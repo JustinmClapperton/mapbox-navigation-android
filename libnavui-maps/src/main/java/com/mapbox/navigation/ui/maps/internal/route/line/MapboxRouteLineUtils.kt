@@ -6,6 +6,9 @@ import android.util.SparseArray
 import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
@@ -510,16 +513,20 @@ object MapboxRouteLineUtils {
      */
     @SuppressLint("LogNotTimber")
     @JvmStatic
-    fun getBelowLayerIdToUse(belowLayerId: String?, style: Style): String? {
+    fun getBelowLayerIdToUse(
+        belowLayerId: String?,
+        style: Style,
+        logger: Logger
+    ): String? {
         return when (belowLayerId) {
             null -> belowLayerId
             else -> when (style.styleLayerExists(belowLayerId)) {
                 true -> belowLayerId
                 false -> {
-                    Log.e(
-                        MapboxRouteLineUtils::class.java.simpleName,
-                        "Layer $belowLayerId not found. Route line related layers will be " +
-                            "placed at top of the map stack."
+                    logger.e(
+                        Tag(MapboxRouteLineUtils::class.java.simpleName),
+                        Message("Layer $belowLayerId not found. Route line related layers will be " +
+                            "placed at top of the map stack.")
                     )
                     null
                 }
@@ -607,7 +614,10 @@ object MapboxRouteLineUtils {
         return expressions.plus(color(defaultColor))
     }
 
-    internal fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
+    internal fun initializeLayers(
+        style: Style,
+        options: MapboxRouteLineOptions
+    ) {
         if (!style.fullyLoaded || layersAreInitialized(style)) {
             return
         }
@@ -615,7 +625,8 @@ object MapboxRouteLineUtils {
         val belowLayerIdToUse: String? =
             getBelowLayerIdToUse(
                 options.routeLineBelowLayerId,
-                style
+                style,
+                options.logger
             )
 
         if (!style.styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID)) {

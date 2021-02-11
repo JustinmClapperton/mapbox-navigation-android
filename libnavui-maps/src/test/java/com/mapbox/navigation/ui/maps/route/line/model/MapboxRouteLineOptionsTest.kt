@@ -2,6 +2,8 @@ package com.mapbox.navigation.ui.maps.route.line.model
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.base.common.logger.Logger
+import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -14,6 +16,8 @@ class MapboxRouteLineOptionsTest {
 
     lateinit var ctx: Context
 
+    private val logger: Logger = mockk()
+
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
@@ -23,7 +27,7 @@ class MapboxRouteLineOptionsTest {
     fun withRouteLineResourceProvider() {
         val routeLineResources = RouteLineResources.Builder().build()
 
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val options = MapboxRouteLineOptions.Builder(ctx, logger)
             .withRouteLineResources(routeLineResources)
             .build()
 
@@ -32,7 +36,7 @@ class MapboxRouteLineOptionsTest {
 
     @Test
     fun withRouteLineBelowLayerId() {
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val options = MapboxRouteLineOptions.Builder(ctx, logger)
             .withRouteLineBelowLayerId("someLayerId")
             .build()
 
@@ -41,7 +45,7 @@ class MapboxRouteLineOptionsTest {
 
     @Test
     fun withTolerance() {
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val options = MapboxRouteLineOptions.Builder(ctx, logger)
             .withTolerance(.111)
             .build()
 
@@ -52,13 +56,13 @@ class MapboxRouteLineOptionsTest {
     fun toBuilder() {
         val routeLineResources = RouteLineResources.Builder().build()
 
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val options = MapboxRouteLineOptions.Builder(ctx, logger)
             .withRouteLineResources(routeLineResources)
             .withVanishingRouteLineEnabled(true)
             .withRouteLineBelowLayerId("someLayerId")
             .withTolerance(.111)
             .build()
-            .toBuilder(ctx)
+            .toBuilder(ctx, logger)
             .build()
 
         assertEquals(routeLineResources, options.resourceProvider)
