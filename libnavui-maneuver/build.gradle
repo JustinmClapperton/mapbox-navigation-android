@@ -47,7 +47,6 @@ dependencies {
     implementation dependenciesList.androidXConstraintLayout
     implementation dependenciesList.kotlinStdLib
 
-    implementation dependenciesList.timber
     implementation dependenciesList.svgParser
     implementation dependenciesList.coroutinesAndroid
 
