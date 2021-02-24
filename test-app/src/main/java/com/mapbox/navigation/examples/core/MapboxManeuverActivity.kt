@@ -20,11 +20,13 @@ import com.mapbox.maps.MapLoadError
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
+import com.mapbox.maps.Style.OnStyleLoaded
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
+import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.getGesturesPlugin
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
@@ -46,6 +48,7 @@ import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityManeuverBinding
+import com.mapbox.navigation.examples.features.HighlightBuildingsExample
 import com.mapbox.navigation.examples.util.RouteLine
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.base.api.maneuver.ManeuverApi
@@ -56,7 +59,8 @@ import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import java.util.Objects
+import timber.log.Timber
+import java.util.*
 
 class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
 
@@ -66,6 +70,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     private lateinit var maneuverApi: ManeuverApi
     private lateinit var binding: LayoutActivityManeuverBinding
     private lateinit var locationComponent: LocationComponentPlugin
+    private lateinit var highlightBuildingsExample: HighlightBuildingsExample
 
     private val mapboxReplayer = MapboxReplayer()
     private val replayRouteMapper = ReplayRouteMapper()
@@ -269,6 +274,13 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxMap.loadStyleUri(
             MAPBOX_STREETS,
             { style: Style ->
+                highlightBuildingsExample = HighlightBuildingsExample(mapboxMap, style)
+                getGesturePlugin().addOnMapClickListener(object : OnMapClickListener {
+                    override fun onMapClick(point: Point): Boolean {
+                        highlightBuildingsExample.selectBuilding(point)
+                        return true
+                    }
+                })
                 getGesturePlugin().addOnMapLongClickListener(this)
             },
             object : OnMapLoadErrorListener {
