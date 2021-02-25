@@ -59,7 +59,7 @@ dependency-updates:
 
 .PHONY: verify-common-sdk-version
 verify-common-sdk-version:
-    ./gradlew verifyCommonSdkVersion
+	./gradlew verifyCommonSdkVersion
 
 .PHONY: dex-count
 dex-count:
