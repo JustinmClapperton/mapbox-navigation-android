@@ -13,8 +13,11 @@ import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.common.ShadowValueConverter
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
+import com.mapbox.navigation.ui.maps.route.line.model.LayerVisibilityUpdate
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineState
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
+import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
@@ -138,14 +141,17 @@ class MapboxRouteLineViewTest {
         }.also {
             mockCheckForLayerInitialization(it)
         }
-        val state = RouteLineState.ClearRouteLineState(
-            primaryRouteFeatureCollection,
-            altRoutesFeatureCollection,
-            altRoutesFeatureCollection,
-            waypointsFeatureCollection
+
+        val state = com.mapbox.navigation.ui.base.model.Expected.Success(
+            RouteLineClearValue(
+                primaryRouteFeatureCollection,
+                altRoutesFeatureCollection,
+                altRoutesFeatureCollection,
+                waypointsFeatureCollection
+            )
         )
 
-        MapboxRouteLineView(options).render(style, state)
+        MapboxRouteLineView(options).renderClearRouteLineValue(style, state)
 
         verify {
             style.setStyleSourceProperty(
@@ -202,10 +208,12 @@ class MapboxRouteLineViewTest {
         val trafficLineExp = mockk<Expression>()
         val routeLineExp = mockk<Expression>()
         val casingLineEx = mockk<Expression>()
-        val state = RouteLineState.VanishingRouteLineUpdateState(
-            trafficLineExp,
-            routeLineExp,
-            casingLineEx
+        val state = com.mapbox.navigation.ui.base.model.Expected.Success(
+            VanishingRouteLineUpdateValue(
+                trafficLineExp,
+                routeLineExp,
+                casingLineEx
+            )
         )
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
@@ -244,7 +252,7 @@ class MapboxRouteLineViewTest {
             mockCheckForLayerInitialization(it)
         }
 
-        MapboxRouteLineView(options).render(style, state)
+        MapboxRouteLineView(options).renderVanishingRouteLineUpdateValue(style, state)
 
         verify {
             style.setStyleLayerProperty(
@@ -288,18 +296,19 @@ class MapboxRouteLineViewTest {
         val alt1SourceSlot = slot<Value>()
         val alt2SourceSlot = slot<Value>()
         val wayPointSourceSlot = slot<Value>()
-        val state = RouteLineState.RouteSetState(
-            primaryRouteFeatureCollection,
-            trafficLineExp,
-            routeLineExp,
-            casingLineEx,
-            alternativeRoute1Expression,
-            alternativeRoute2Expression,
-            alternativeRoute1FeatureCollection,
-            alternativeRoute2FeatureCollection,
-            waypointsFeatureCollection
+        val state = com.mapbox.navigation.ui.base.model.Expected.Success(
+            RouteSetValue(
+                primaryRouteFeatureCollection,
+                trafficLineExp,
+                routeLineExp,
+                casingLineEx,
+                alternativeRoute1Expression,
+                alternativeRoute2Expression,
+                alternativeRoute1FeatureCollection,
+                alternativeRoute2FeatureCollection,
+                waypointsFeatureCollection
+            )
         )
-
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
@@ -382,7 +391,7 @@ class MapboxRouteLineViewTest {
             mockCheckForLayerInitialization(it)
         }
 
-        MapboxRouteLineView(options).render(style, state)
+        MapboxRouteLineView(options).renderRouteDrawData(style, state)
 
         verify {
             style.setStyleLayerProperty(
@@ -471,8 +480,10 @@ class MapboxRouteLineViewTest {
     fun updateVisibility() {
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val state = RouteLineState.UpdateLayerVisibilityState(
-            listOf(Pair(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.NONE))
+        val state = com.mapbox.navigation.ui.base.model.Expected.Success(
+            LayerVisibilityUpdate(
+                listOf(Pair(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.NONE))
+            )
         )
         val visibilityValueSlot = slot<Value>()
         val style = mockk<Style> {
@@ -495,7 +506,7 @@ class MapboxRouteLineViewTest {
             mockCheckForLayerInitialization(it)
         }
 
-        MapboxRouteLineView(options).render(style, state)
+        MapboxRouteLineView(options).renderVisibilityUpdate(style, state)
 
         verify {
             style.setStyleLayerProperty(

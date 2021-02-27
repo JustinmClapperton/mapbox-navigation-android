@@ -216,7 +216,7 @@ class MapboxNavigationActivity :
             if (routes.isNotEmpty()) {
                 routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
                     ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
-                        view.render(style, this)
+                        view.renderRouteDrawData(style, this)
                     }
                 }
                 viewportDataSource.onRouteChanged(routes[0])
@@ -484,7 +484,7 @@ class MapboxNavigationActivity :
 
     private fun clearRouteLine() {
         ifNonNull(routeLineAPI, routeLineView, mapboxMap.getStyle()) { api, view, style ->
-            view.render(style, api.clearRouteLine())
+            view.renderClearRouteLineValue(style, api.clearRouteLine())
         }
     }
 
