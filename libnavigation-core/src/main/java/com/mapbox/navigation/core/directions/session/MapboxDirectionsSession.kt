@@ -1,11 +1,12 @@
 package com.mapbox.navigation.core.directions.session
 
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.utils.internal.ifNonNull
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -15,8 +16,13 @@ import java.util.concurrent.CopyOnWriteArraySet
  * @property routes a list of [DirectionsRoute]. Fetched from [Router] or might be set manually
  */
 internal class MapboxDirectionsSession(
-    private val router: Router
+    private val router: Router,
+    private val logger: Logger
 ) : DirectionsSession {
+
+    companion object {
+        private const val TAG = "MapboxDirectionsSession"
+    }
 
     private val routesObservers = CopyOnWriteArraySet<RoutesObserver>()
     private var routeOptions: RouteOptions? = null
@@ -76,60 +82,38 @@ internal class MapboxDirectionsSession(
      */
     override fun requestRoutes(
         routeOptions: RouteOptions,
-        routesRequestCallback: RoutesRequestCallback?
+        routesRequestCallback: RoutesRequestCallback
     ) {
         router.getRoute(
             routeOptions,
             object : Router.Callback {
                 override fun onResponse(routes: List<DirectionsRoute>) {
-                    val fixedRoutes = getFixedRoutes(routes, routeOptions)
-                    this@MapboxDirectionsSession.routes = fixedRoutes
-                    routesRequestCallback?.onRoutesReady(fixedRoutes)
-                    // todo log in the future
-                }
-
-                override fun onFailure(throwable: Throwable) {
-                    routesRequestCallback?.onRoutesRequestFailure(throwable, routeOptions)
-                    // todo log in the future
-                }
-
-                override fun onCanceled() {
-                    routesRequestCallback?.onRoutesRequestCanceled(routeOptions)
-                    // todo log in the future
-                }
-            }
-        )
-    }
-
-    /**
-     * Requests a route using the provided [Router] implementation.
-     * Unlike [DirectionsSession.requestRoutes] it ignores the result and it's up to the
-     * consumer to take an action with the route.
-     *
-     * @param adjustedRouteOptions: RouteOptions with adjusted parameters
-     * @param routesRequestCallback Callback that gets notified when request state changes
-     */
-    override fun requestFasterRoute(
-        adjustedRouteOptions: RouteOptions,
-        routesRequestCallback: RoutesRequestCallback
-    ) {
-        router.getRoute(
-            adjustedRouteOptions,
-            object : Router.Callback {
-                override fun onResponse(routes: List<DirectionsRoute>) {
+                    logger.d(Tag(TAG), Message("Route request - success: $routes"))
                     routesRequestCallback.onRoutesReady(routes)
                 }
 
                 override fun onFailure(throwable: Throwable) {
-                    ifNonNull(routeOptions) { options ->
-                        routesRequestCallback.onRoutesRequestFailure(throwable, options)
-                    }
+                    logger.e(
+                        Tag(TAG), Message(
+                            """
+                                Route request - failure: $throwable
+                                For options: $routeOptions
+                            """.trimIndent()
+                        )
+                    )
+                    routesRequestCallback.onRoutesRequestFailure(throwable, routeOptions)
                 }
 
                 override fun onCanceled() {
-                    ifNonNull(routeOptions) { options ->
-                        routesRequestCallback.onRoutesRequestCanceled(options)
-                    }
+                    logger.d(
+                        Tag(TAG), Message(
+                            """
+                                Route request - canceled.
+                                For options: $routeOptions
+                            """.trimIndent()
+                        )
+                    )
+                    routesRequestCallback.onRoutesRequestCanceled(routeOptions)
                 }
             }
         )
@@ -164,37 +148,5 @@ internal class MapboxDirectionsSession(
      */
     override fun shutdown() {
         router.shutdown()
-    }
-
-    /**
-     * Temporary method for handle routes with multiple waypoints.
-     * Current Directions API doesn't support more than one waypoint
-     * for [DirectionsCriteria.PROFILE_DRIVING_TRAFFIC].
-     * Also NavNative returns "null" in "routeOptions" field.
-     * TODO After these two points are fixed - this method can be removed.
-     */
-    private fun getFixedRoutes(
-        routes: List<DirectionsRoute>,
-        routeOptions: RouteOptions
-    ): List<DirectionsRoute> {
-        val fixedRoutes = mutableListOf<DirectionsRoute>()
-        for (route in routes) {
-            val fixedRouteOptions = route.routeOptions()?.toBuilder()?.apply {
-                ifNonNull(routeOptions.waypointIndices()) {
-                    waypointIndices(it)
-                }
-                ifNonNull(routeOptions.waypointNames()) {
-                    waypointNames(it)
-                }
-                ifNonNull(routeOptions.waypointTargets()) {
-                    waypointTargets(it)
-                }
-            }?.build()
-            val fixedRoute = route.toBuilder()
-                .routeOptions(fixedRouteOptions)
-                .build()
-            fixedRoutes.add(fixedRoute)
-        }
-        return fixedRoutes
     }
 }

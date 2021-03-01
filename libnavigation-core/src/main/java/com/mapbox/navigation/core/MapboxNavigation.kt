@@ -200,7 +200,8 @@ class MapboxNavigation(
         )
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
-            MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider)
+            MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider),
+            logger
         )
         directionsSession.registerRoutesObserver(navigationSession)
         val notification: TripNotification = MapboxModuleProvider
@@ -328,22 +329,18 @@ class MapboxNavigation(
     fun getTripSessionState(): TripSessionState = tripSession.getState()
 
     /**
-     * Requests a route using the provided [Router] implementation.
-     * If the request succeeds and the SDK enters an `Active Guidance` state, meaningful [RouteProgress] updates will be available.
+     * Requests a route using the available [Router] implementation.
      *
-     * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
-     *
-     * Use [MapboxNavigation.setRoutes] to supply a transformed list of routes, or a list from an external source, to be managed by the SDK.
+     * Use [MapboxNavigation.setRoutes] to supply the returned list of routes, transformed list, or a list from an external source, to be managed by the SDK.
      *
      * @param routeOptions params for the route request
      * @param routesRequestCallback listener that gets notified when request state changes
      * @see [registerRoutesObserver]
      * @see [registerRouteProgressObserver]
      */
-    @JvmOverloads
     fun requestRoutes(
         routeOptions: RouteOptions,
-        routesRequestCallback: RoutesRequestCallback? = null
+        routesRequestCallback: RoutesRequestCallback
     ) {
         rerouteController?.interrupt()
         directionsSession.requestRoutes(routeOptions, routesRequestCallback)
@@ -352,10 +349,9 @@ class MapboxNavigation(
     /**
      * Set a list of routes.
      *
-     * If the list is empty, the SDK will exit the `Active Guidance` state.
+     * If the list is not empty, and the route at index 0 is valid, the SDK enters an `Active Guidance` state and [RouteProgress] updates will be available.
      *
-     * If the list is not empty, the route at index 0 is going to be treated as the primary route
-     * and used for route progress calculations and off route events.
+     * If the list is empty, the SDK will exit the `Active Guidance` state.
      *
      * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
      *
@@ -364,6 +360,40 @@ class MapboxNavigation(
     fun setRoutes(routes: List<DirectionsRoute>) {
         rerouteController?.interrupt()
         directionsSession.routes = routes
+    }
+
+    /**
+     * Requests a route using the provided [Router] implementation.
+     *
+     * If the request succeeds, the list is not empty, and the route at index 0 is valid, then the SDK enters an `Active Guidance` state and [RouteProgress] (and other) updates will be available.
+     *
+     * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
+     *
+     * @param routeOptions params for the route request
+     * @param routesRequestCallback listener that gets notified when request state changes
+     * @see [registerRoutesObserver]
+     * @see [registerRouteProgressObserver]
+     */
+    @JvmOverloads
+    fun setRoutes(
+        routeOptions: RouteOptions,
+        routesRequestCallback: RoutesRequestCallback? = null
+    ) {
+        rerouteController?.interrupt()
+        directionsSession.requestRoutes(routeOptions, object : RoutesRequestCallback {
+            override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                directionsSession.routes = routes
+                routesRequestCallback?.onRoutesReady(routes)
+            }
+
+            override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
+                routesRequestCallback?.onRoutesRequestFailure(throwable, routeOptions)
+            }
+
+            override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+                routesRequestCallback?.onRoutesRequestCanceled(routeOptions)
+            }
+        })
     }
 
     /**

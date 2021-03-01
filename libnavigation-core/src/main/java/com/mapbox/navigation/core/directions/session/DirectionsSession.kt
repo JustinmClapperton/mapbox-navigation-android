@@ -28,19 +28,6 @@ internal interface DirectionsSession {
      */
     fun requestRoutes(
         routeOptions: RouteOptions,
-        routesRequestCallback: RoutesRequestCallback? = null
-    )
-
-    /**
-     * Requests a route using the provided [Router] implementation.
-     * Unlike [DirectionsSession.requestRoutes] it ignores the result and it's up to the
-     * consumer to take an action with the route.
-     *
-     * @param adjustedRouteOptions: RouteOptions with adjusted parameters
-     * @param routesRequestCallback Callback that gets notified when request state changes
-     */
-    fun requestFasterRoute(
-        adjustedRouteOptions: RouteOptions,
         routesRequestCallback: RoutesRequestCallback
     )
 
