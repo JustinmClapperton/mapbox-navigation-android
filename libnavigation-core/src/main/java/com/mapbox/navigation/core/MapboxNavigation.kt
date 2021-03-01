@@ -115,8 +115,9 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  * If the session is stopped, the SDK will stop listening for raw location updates and enter the `Idle` state.
  *
  * ### Routing
- * A route can be requested with [requestRoutes]. If the request is successful and returns a non-empty list of routes in the [RoutesObserver],
- * the first route at index 0 is going to be chosen as a primary one.
+ * A route can be requested with:
+ * - [setRoutes] set a route directly or request a new route. If the request is successful the routes are immediately available via the [RoutesObserver] and the first route (at index 0) is going to be chosen as the primary one.
+ * - [requestRoutes], if successful, returns a route reference without acting on it. You can then use it as a primary route with [setRoutes].
  *
  * If the SDK is in an `Idle` state, it stays in this same state even when a primary route is available.
  *
@@ -177,12 +178,14 @@ class MapboxNavigation(
      */
     private var rerouteController: RerouteController?
     private val defaultRerouteController: RerouteController
+
     /**
      * [MapboxNavigation.roadObjectsStore] provides methods to get road objects metadata,
      * add and remove custom road
      * objects.
      */
     val roadObjectsStore: RoadObjectsStore
+
     /**
      * [MapboxNavigation.graphAccessor] provides methods to get edge (e.g. [EHorizonEdge]) shape and
      * metadata.
@@ -333,6 +336,17 @@ class MapboxNavigation(
      *
      * Use [MapboxNavigation.setRoutes] to supply the returned list of routes, transformed list, or a list from an external source, to be managed by the SDK.
      *
+     * Example:
+     * ```
+     * mapboxNavigation.requestRoutes(routeOptions, object : RoutesRequestCallback {
+     *     override fun onRoutesReady(routes: List<DirectionsRoute>) {
+     *         ...
+     *         mapboxNavigation.setRoutes(routes)
+     *     }
+     *     ...
+     * })
+     * ```
+     *
      * @param routeOptions params for the route request
      * @param routesRequestCallback listener that gets notified when request state changes
      * @see [registerRoutesObserver]
@@ -380,20 +394,26 @@ class MapboxNavigation(
         routesRequestCallback: RoutesRequestCallback? = null
     ) {
         rerouteController?.interrupt()
-        directionsSession.requestRoutes(routeOptions, object : RoutesRequestCallback {
-            override fun onRoutesReady(routes: List<DirectionsRoute>) {
-                directionsSession.routes = routes
-                routesRequestCallback?.onRoutesReady(routes)
-            }
+        directionsSession.requestRoutes(
+            routeOptions,
+            object : RoutesRequestCallback {
+                override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                    directionsSession.routes = routes
+                    routesRequestCallback?.onRoutesReady(routes)
+                }
 
-            override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-                routesRequestCallback?.onRoutesRequestFailure(throwable, routeOptions)
-            }
+                override fun onRoutesRequestFailure(
+                    throwable: Throwable,
+                    routeOptions: RouteOptions
+                ) {
+                    routesRequestCallback?.onRoutesRequestFailure(throwable, routeOptions)
+                }
 
-            override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-                routesRequestCallback?.onRoutesRequestCanceled(routeOptions)
+                override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+                    routesRequestCallback?.onRoutesRequestCanceled(routeOptions)
+                }
             }
-        })
+        )
     }
 
     /**

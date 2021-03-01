@@ -303,7 +303,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
         .alternatives(true)
         .build();
 
-    mapboxNavigation.requestRoutes(
+    mapboxNavigation.setRoutes(
         routeOptions,
         routesReqCallback
     );

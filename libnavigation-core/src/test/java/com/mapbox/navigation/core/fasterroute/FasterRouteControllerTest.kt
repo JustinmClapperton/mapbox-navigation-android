@@ -57,7 +57,7 @@ class FasterRouteControllerTest {
 
         every { directionsSession.getRouteOptions() } returns mockk()
         every {
-            directionsSession.requestFasterRoute(
+            directionsSession.requestRoutes(
                 any(),
                 capture(routesRequestCallbacks)
             )
@@ -104,7 +104,7 @@ class FasterRouteControllerTest {
         fasterRouteController.stop()
 
         coroutineRule.testDispatcher.cleanupTestCoroutines()
-        verify(exactly = 5) { directionsSession.requestFasterRoute(any(), any()) }
+        verify(exactly = 5) { directionsSession.requestRoutes(any(), any()) }
     }
 
     @Test
@@ -120,7 +120,7 @@ class FasterRouteControllerTest {
         fasterRouteController.stop()
 
         coroutineRule.testDispatcher.cleanupTestCoroutines()
-        verify(exactly = 0) { directionsSession.requestFasterRoute(any(), any()) }
+        verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
     }
 
     @Test
@@ -136,7 +136,7 @@ class FasterRouteControllerTest {
             every { longitude } returns 151.206087
         }
         every {
-            directionsSession.requestFasterRoute(
+            directionsSession.requestRoutes(
                 any(),
                 capture(routesRequestCallbacks)
             )
@@ -170,7 +170,7 @@ class FasterRouteControllerTest {
             every { longitude } returns 151.206087
         }
         every {
-            directionsSession.requestFasterRoute(
+            directionsSession.requestRoutes(
                 any(),
                 capture(routesRequestCallbacks)
             )

@@ -94,7 +94,8 @@ internal class MapboxDirectionsSession(
 
                 override fun onFailure(throwable: Throwable) {
                     logger.e(
-                        Tag(TAG), Message(
+                        Tag(TAG),
+                        Message(
                             """
                                 Route request - failure: $throwable
                                 For options: $routeOptions
@@ -106,7 +107,8 @@ internal class MapboxDirectionsSession(
 
                 override fun onCanceled() {
                     logger.d(
-                        Tag(TAG), Message(
+                        Tag(TAG),
+                        Message(
                             """
                                 Route request - canceled.
                                 For options: $routeOptions

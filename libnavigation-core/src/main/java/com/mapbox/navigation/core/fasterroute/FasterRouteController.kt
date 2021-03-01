@@ -65,7 +65,7 @@ internal class FasterRouteController(
             .let { routeOptionsResult ->
                 when (routeOptionsResult) {
                     is RouteOptionsUpdater.RouteOptionsResult.Success ->
-                        directionsSession.requestFasterRoute(
+                        directionsSession.requestRoutes(
                             routeOptionsResult.routeOptions,
                             fasterRouteRequestCallback
                         )

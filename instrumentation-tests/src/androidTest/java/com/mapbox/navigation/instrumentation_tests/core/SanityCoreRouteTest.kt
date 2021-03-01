@@ -71,7 +71,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
         }
         runOnMainSync {
             mapboxNavigation.startTripSession()
-            mapboxNavigation.requestRoutes(
+            mapboxNavigation.setRoutes(
                 RouteOptions.builder().applyDefaultParams()
                     .baseUrl(mockWebServerRule.baseUrl)
                     .accessToken(getMapboxAccessTokenFromResources(activity))

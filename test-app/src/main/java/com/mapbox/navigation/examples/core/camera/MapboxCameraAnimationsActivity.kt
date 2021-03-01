@@ -509,7 +509,7 @@ class MapboxCameraAnimationsActivity :
             )
             .build()
 
-        mapboxNavigation.requestRoutes(routeOptions)
+        mapboxNavigation.setRoutes(routeOptions)
     }
 
     override fun onMapLongClick(point: Point): Boolean {

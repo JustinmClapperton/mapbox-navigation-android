@@ -99,7 +99,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         runOnMainSync {
             mockLocationUpdatesRule.pushLocationUpdate(originLocation)
             mapboxNavigation.startTripSession()
-            mapboxNavigation.requestRoutes(
+            mapboxNavigation.setRoutes(
                 RouteOptions.builder().applyDefaultParams()
                     .baseUrl(mockWebServerRule.baseUrl)
                     .accessToken(getMapboxAccessTokenFromResources(activity))

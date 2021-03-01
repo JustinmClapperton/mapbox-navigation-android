@@ -438,7 +438,7 @@ class MapboxVoiceActivity :
             )
             .build()
 
-        mapboxNavigation.requestRoutes(routeOptions)
+        mapboxNavigation.setRoutes(routeOptions)
     }
 
     override fun onStart() {

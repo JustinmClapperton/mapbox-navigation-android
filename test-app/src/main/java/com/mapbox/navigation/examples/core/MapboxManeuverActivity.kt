@@ -279,7 +279,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private fun findRoute(origin: Point, destination: Point) {
-        mapboxNavigation.requestRoutes(
+        mapboxNavigation.setRoutes(
             RouteOptions.builder().applyDefaultParams()
                 .accessToken(Objects.requireNonNull<String>(getMapboxAccessTokenFromResources()))
                 .coordinates(origin, null, destination)

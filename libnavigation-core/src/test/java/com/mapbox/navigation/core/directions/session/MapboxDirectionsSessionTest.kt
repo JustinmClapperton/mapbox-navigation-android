@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.core.NavigationComponentProvider
 import io.mockk.clearMocks
@@ -21,6 +22,7 @@ class MapboxDirectionsSessionTest {
     private lateinit var session: MapboxDirectionsSession
 
     private val router: Router = mockk(relaxUnitFun = true)
+    private val logger: Logger = mockk(relaxUnitFun = true)
     private val routeOptions: RouteOptions = mockk(relaxUnitFun = true)
     private val routesRequestCallback: RoutesRequestCallback = mockk(relaxUnitFun = true)
     private val observer: RoutesObserver = mockk(relaxUnitFun = true)
@@ -53,7 +55,7 @@ class MapboxDirectionsSessionTest {
         every { routesRequestCallback.onRoutesReady(any()) } answers {
             this.value
         }
-        session = MapboxDirectionsSession(router)
+        session = MapboxDirectionsSession(router, logger)
     }
 
     @Test
@@ -176,7 +178,7 @@ class MapboxDirectionsSessionTest {
     fun fasterRoute_availableRoutes() {
         session.requestRoutes(routeOptions, routesRequestCallback)
         callback.onResponse(routes)
-        session.requestFasterRoute(routeOptions, routesRequestCallback)
+        session.requestRoutes(routeOptions, routesRequestCallback)
         callback.onResponse(routes)
         verify { routesRequestCallback.onRoutesReady(routes) }
     }
@@ -186,7 +188,7 @@ class MapboxDirectionsSessionTest {
         session.requestRoutes(routeOptions, routesRequestCallback)
         callback.onResponse(routes)
         val throwable: Throwable = mockk()
-        session.requestFasterRoute(routeOptions, routesRequestCallback)
+        session.requestRoutes(routeOptions, routesRequestCallback)
         callback.onFailure(throwable)
         verify { routesRequestCallback.onRoutesRequestFailure(any(), any()) }
     }
@@ -195,7 +197,7 @@ class MapboxDirectionsSessionTest {
     fun fasterRoute_canceledRoutes() {
         session.requestRoutes(routeOptions, routesRequestCallback)
         callback.onResponse(routes)
-        session.requestFasterRoute(routeOptions, routesRequestCallback)
+        session.requestRoutes(routeOptions, routesRequestCallback)
         callback.onCanceled()
         verify { routesRequestCallback.onRoutesRequestCanceled(any()) }
     }
@@ -206,10 +208,10 @@ class MapboxDirectionsSessionTest {
     fun fasterRoute_canceledByNewRequest() {
         session.requestRoutes(routeOptions, routesRequestCallback)
         callback.onResponse(routes)
-        session.requestFasterRoute(routeOptions, routesRequestCallback)
+        session.requestRoutes(routeOptions, routesRequestCallback)
         clearMocks(router)
         session.requestRoutes(routeOptions, routesRequestCallback)
-        session.requestFasterRoute(routeOptions, routesRequestCallback)
+        session.requestRoutes(routeOptions, routesRequestCallback)
         verify(exactly = 1) { router.cancel() }
     }
 

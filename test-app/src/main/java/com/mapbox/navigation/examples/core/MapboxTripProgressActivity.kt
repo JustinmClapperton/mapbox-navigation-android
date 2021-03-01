@@ -228,7 +228,7 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
             .coordinates(listOf(origin, destination))
             .alternatives(true)
             .build()
-        mapboxNavigation.requestRoutes(routeOptions)
+        mapboxNavigation.setRoutes(routeOptions)
     }
 
     private val routeProgressObserver = object : RouteProgressObserver {
