@@ -176,6 +176,7 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     field public static final double MAX_ZOOM_ARROW_SHAFT_CASING_SCALE = 17.0;
     field public static final double MAX_ZOOM_ARROW_SHAFT_SCALE = 13.0;
     field public static final double MIN_ARROW_ZOOM = 10.0;
+    field public static final double MIN_OFFSET = 0.001;
     field public static final double MIN_ZOOM_ARROW_HEAD_CASING_SCALE = 0.2;
     field public static final double MIN_ZOOM_ARROW_HEAD_SCALE = 0.2;
     field public static final double MIN_ZOOM_ARROW_SHAFT_CASING_SCALE = 3.4;

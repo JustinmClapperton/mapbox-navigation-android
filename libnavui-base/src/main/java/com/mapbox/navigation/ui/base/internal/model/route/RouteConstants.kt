@@ -115,4 +115,5 @@ object RouteConstants {
 
     @DrawableRes
     val MANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE: Int = R.drawable.mapbox_ic_arrow_head_casing
+    const val MIN_OFFSET: Double = 0.001
 }

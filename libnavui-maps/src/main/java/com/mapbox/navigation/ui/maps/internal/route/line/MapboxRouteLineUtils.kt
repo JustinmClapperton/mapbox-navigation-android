@@ -20,6 +20,7 @@ import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.MIN_OFFSET
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
@@ -67,7 +68,9 @@ object MapboxRouteLineUtils {
                 literal(0.0)
             }
         }
-        val filteredItems = routeLineExpressionData.filter { it.offset > distanceOffset }
+        val filteredItems = routeLineExpressionData
+            .filter { it.offset >= MIN_OFFSET }
+            .filter { it.offset > distanceOffset }
         when (filteredItems.isEmpty()) {
             true -> when (routeLineExpressionData.isEmpty()) {
                 true -> listOf(RouteLineExpressionData(distanceOffset, fallbackRouteColor))

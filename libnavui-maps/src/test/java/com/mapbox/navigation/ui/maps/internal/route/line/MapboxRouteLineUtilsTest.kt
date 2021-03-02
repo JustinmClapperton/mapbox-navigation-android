@@ -71,6 +71,30 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
+    fun getTrafficLineExpressionSmallValuesFilteredOut() {
+        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.001, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.0011926985676139702, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.0013977277614471628, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val expressionDatas = listOf(
+            RouteLineExpressionData(0.0007875125394489743, -11097861),
+            RouteLineExpressionData(0.000988627405946961, -11097861),
+            RouteLineExpressionData(0.001, -11097861),
+            RouteLineExpressionData(0.0011926985676139702, -11097861),
+            RouteLineExpressionData(0.0013977277614471628, -11097861)
+        )
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpression(
+            0.0,
+            expressionDatas,
+            -11097861
+        )
+
+        assertEquals(result.toString(), expectedExpression)
+    }
+
+    @Test
     fun getVanishingRouteLineExpressionTest() {
         val expectedExpression = "[step, [line-progress], [rgba, 255.0, 77.0, 77.0, 1.0]" +
             ", 3.0, [rgba, 86.0, 168.0, 251.0, 1.0]]"
