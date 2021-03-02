@@ -40,6 +40,7 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin;
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPluginImpl;
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener;
 import com.mapbox.navigation.base.internal.route.RouteUrl;
+import com.mapbox.navigation.base.logger.LoggerProvider;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
@@ -137,7 +138,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     initListeners();
 
     RouteLineResources routeLineResources = new RouteLineResources.Builder().build();
-    MapboxRouteLineOptions mapboxRouteLineOptions = new MapboxRouteLineOptions.Builder(this, mapboxLogger)
+    MapboxRouteLineOptions mapboxRouteLineOptions = new MapboxRouteLineOptions.Builder(this)
         .withRouteLineResources(routeLineResources)
         .withVanishingRouteLineEnabled(true)
         .withRouteLineBelowLayerId("road-label")
@@ -230,7 +231,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     mapboxNavigation.registerRoutesObserver(routesObserver);
     mapboxNavigation.startTripSession();
 
-    mapboxLogger = mapboxNavigation.getLogger();
+    mapboxLogger = LoggerProvider.INSTANCE.getLogger();
 
     mapboxReplayer.pushRealLocation(this, 0.0);
     mapboxReplayer.play();

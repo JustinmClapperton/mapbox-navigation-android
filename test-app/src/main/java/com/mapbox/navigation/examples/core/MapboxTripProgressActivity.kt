@@ -30,6 +30,7 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.internal.route.RouteUrl
+import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -114,7 +115,7 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
 
-        mapboxLogger = mapboxNavigation.getLogger()
+        mapboxLogger = LoggerProvider.logger
 
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()

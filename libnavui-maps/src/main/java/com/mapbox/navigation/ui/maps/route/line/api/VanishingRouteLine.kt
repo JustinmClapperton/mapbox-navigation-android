@@ -2,11 +2,11 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -28,7 +28,7 @@ import com.mapbox.navigation.ui.utils.internal.ifNonNull
  * OnIndicatorPositionChangedListener to the MapboxRouteLineApi. See the documentation for more
  * information.
  */
-internal class VanishingRouteLine(private val logger: Logger) {
+internal class VanishingRouteLine {
     /**
      * the route points for the indicated primary route
      */
@@ -117,7 +117,7 @@ internal class VanishingRouteLine(private val logger: Logger) {
         ) { granularDistances, index ->
             val upcomingIndex = granularDistances.distancesArray[index]
             if (upcomingIndex == null) {
-                logger.e(
+                LoggerProvider.logger.e(
                     msg = Message(
                         """
                            Upcoming route line index is null.
