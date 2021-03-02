@@ -20,7 +20,6 @@ import com.mapbox.maps.MapLoadError
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
-import com.mapbox.maps.Style.OnStyleLoaded
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
@@ -59,8 +58,7 @@ import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import timber.log.Timber
-import java.util.*
+import java.util.Objects
 
 class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
 
