@@ -25,7 +25,7 @@ internal class MapboxDirectionsSession(
     }
 
     private val routesObservers = CopyOnWriteArraySet<RoutesObserver>()
-    private var routeOptions: RouteOptions? = null
+    private var primaryRouteOptions: RouteOptions? = null
 
     /**
      * Routes that were fetched from [Router] or set manually.
@@ -35,27 +35,26 @@ internal class MapboxDirectionsSession(
      */
     override var routes: List<DirectionsRoute> = emptyList()
         set(value) {
-            router.cancel()
             if (routes.isEmpty() && value.isEmpty()) {
                 return
             }
             field = value
             if (routes.isNotEmpty()) {
-                this.routeOptions = routes[0].routeOptions()
+                this.primaryRouteOptions = routes[0].routeOptions()
             }
             routesObservers.forEach { it.onRoutesChanged(value) }
         }
 
     /**
-     * Provide route options for current [routes]
+     * Provide route options for current primary route.
      */
-    override fun getRouteOptions(): RouteOptions? = routeOptions
+    override fun getPrimaryRouteOptions(): RouteOptions? = primaryRouteOptions
 
     /**
      * Interrupts a route-fetching request if one is in progress.
      */
     override fun cancel() {
-        router.cancel()
+        router.cancelAll()
     }
 
     /**

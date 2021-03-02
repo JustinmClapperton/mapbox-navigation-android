@@ -423,7 +423,7 @@ class MapboxNavigationTest {
 
     @Test
     fun fasterRoute_noRouteOptions_noRequest() {
-        every { directionsSession.getRouteOptions() } returns null
+        every { directionsSession.getPrimaryRouteOptions() } returns null
         verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
 
         mapboxNavigation.onDestroy()
@@ -807,7 +807,7 @@ class MapboxNavigationTest {
         every { NavigationComponentProvider.createDirectionsSession(any(), any()) } answers {
             directionsSession
         }
-        every { directionsSession.getRouteOptions() } returns routeOptions
+        every { directionsSession.getPrimaryRouteOptions() } returns routeOptions
         every { directionsSession.requestRoutes(any(), any()) } answers {
             fasterRouteRequestCallback.onRoutesReady(routes)
         }

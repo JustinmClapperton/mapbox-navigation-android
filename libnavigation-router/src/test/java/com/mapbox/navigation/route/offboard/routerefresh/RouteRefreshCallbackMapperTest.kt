@@ -20,11 +20,6 @@ import retrofit2.Response
 class RouteRefreshCallbackMapperTest {
 
     @Test
-    fun sanity() {
-        RouteRefreshCallbackMapper(mockk(), mockk())
-    }
-
-    @Test
     fun testError() {
         val callback = mockCallback()
         val error = slot<RouteRefreshError>()

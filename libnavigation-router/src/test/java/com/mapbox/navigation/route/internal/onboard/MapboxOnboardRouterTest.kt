@@ -117,7 +117,7 @@ class MapboxOnboardRouterTest {
     @Test
     fun checkCallbackCalledOnCancel() {
         coEvery { navigator.getRoute(any()) } coAnswers {
-            onboardRouter.cancel()
+            onboardRouter.cancelAll()
             routerResultSuccess
         }
 
@@ -156,7 +156,7 @@ class MapboxOnboardRouterTest {
         coEvery {
             navigator.getRoute(any())
         } coAnswers {
-            onboardRouter.cancel()
+            onboardRouter.cancelAll()
             routerResultFailure
         }
 

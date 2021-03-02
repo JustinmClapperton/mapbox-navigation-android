@@ -48,7 +48,7 @@ internal class MapboxRerouteController(
             Message("Fetching route")
         )
         routeOptionsUpdater.update(
-            directionsSession.getRouteOptions(),
+            directionsSession.getPrimaryRouteOptions(),
             tripSession.getRouteProgress(),
             tripSession.getEnhancedLocation()
         )

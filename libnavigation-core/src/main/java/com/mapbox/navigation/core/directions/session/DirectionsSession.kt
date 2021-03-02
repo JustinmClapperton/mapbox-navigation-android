@@ -16,9 +16,9 @@ internal interface DirectionsSession {
     var routes: List<DirectionsRoute>
 
     /**
-     * Provide route options for current [routes]
+     * Provide route options for current primary route.
      */
-    fun getRouteOptions(): RouteOptions?
+    fun getPrimaryRouteOptions(): RouteOptions?
 
     /**
      * Fetch route based on [RouteOptions]

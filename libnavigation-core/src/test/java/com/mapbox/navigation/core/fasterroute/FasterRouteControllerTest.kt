@@ -55,7 +55,7 @@ class FasterRouteControllerTest {
             routeOptionsResultSuccess.routeOptions
         } returns routeOptionsResultSuccessRouteOptions
 
-        every { directionsSession.getRouteOptions() } returns mockk()
+        every { directionsSession.getPrimaryRouteOptions() } returns mockk()
         every {
             directionsSession.requestRoutes(
                 any(),

@@ -103,14 +103,14 @@ class MapboxOffboardRouterTest : BaseTest() {
     fun cancel_NavigationRouteCancelCallCalled() {
         getRoute(mockk())
 
-        offboardRouter.cancel()
+        offboardRouter.cancelAll()
 
         verify { mapboxDirections.cancelCall() }
     }
 
     @Test
     fun cancel_NavigationRouteCancelCallNotCalled() {
-        offboardRouter.cancel()
+        offboardRouter.cancelAll()
 
         verify(exactly = 0) { mapboxDirections.cancelCall() }
     }

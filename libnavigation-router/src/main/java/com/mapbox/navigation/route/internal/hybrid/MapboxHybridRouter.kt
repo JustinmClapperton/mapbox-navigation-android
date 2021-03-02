@@ -225,16 +225,16 @@ class MapboxHybridRouter(
     /**
      * Interrupts a route-fetching request if one is in progress.
      */
-    override fun cancel() {
-        onboardRouter.cancel()
-        offboardRouter.cancel()
+    override fun cancelAll() {
+        onboardRouter.cancelAll()
+        offboardRouter.cancelAll()
     }
 
     /**
      * Release used resources.
      */
     override fun shutdown() {
-        cancel()
+        cancelAll()
         networkStatusJob.cancel()
     }
 }

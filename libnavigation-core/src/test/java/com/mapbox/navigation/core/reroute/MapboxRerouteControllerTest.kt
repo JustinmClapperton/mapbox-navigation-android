@@ -118,7 +118,7 @@ class MapboxRerouteControllerTest {
             tripSession.getRouteProgress()
         }
         verify(exactly = 1) {
-            directionsSession.getRouteOptions()
+            directionsSession.getPrimaryRouteOptions()
         }
     }
 

@@ -9,14 +9,16 @@ import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
+import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.route.onboard.OfflineRoute
 import com.mapbox.navigation.utils.NavigationException
+import com.mapbox.navigation.utils.internal.RequestMap
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouterError
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -39,6 +41,7 @@ class MapboxOnboardRouter(
     }
 
     private val mainJobControl by lazy { ThreadController.getMainScopeAndRootJob() }
+    private val requests = RequestMap<Job>()
 
     /**
      * Fetch route based on [RouteOptions]
@@ -49,7 +52,7 @@ class MapboxOnboardRouter(
     override fun getRoute(
         routeOptions: RouteOptions,
         callback: Router.Callback
-    ) {
+    ): Int {
         val origin = routeOptions.coordinates().first()
         val destination = routeOptions.coordinates().last()
         val waypoints = routeOptions.coordinates().drop(1).dropLast(1)
@@ -88,21 +91,53 @@ class MapboxOnboardRouter(
             )
         ).build()
 
-        retrieveRoute(offlineRouter.buildUrl(), callback)
+        val requestId = requests.generateNextRequestId()
+        val internalCallback = object : Router.Callback {
+            override fun onResponse(routes: List<DirectionsRoute>) {
+                requests.remove(requestId)
+                callback.onResponse(routes)
+            }
+
+            override fun onFailure(throwable: Throwable) {
+                requests.remove(requestId)
+                callback.onFailure(throwable)
+            }
+
+            override fun onCanceled() {
+                requests.remove(requestId)
+                callback.onCanceled()
+            }
+        }
+        requests.put(requestId, retrieveRoute(offlineRouter.buildUrl(), internalCallback))
+        return requestId
+    }
+
+    override fun cancelRouteRequest(requestId: Int) {
+        val request = requests.remove(requestId)
+        if (request != null) {
+            request.cancel()
+        } else {
+            logger.w(
+                loggerTag,
+                Message("Trying to cancel non-existing route request with id '$requestId'")
+            )
+        }
     }
 
     /**
      * Interrupts a route-fetching request if one is in progress.
      */
-    override fun cancel() {
-        mainJobControl.job.cancelChildren()
+    override fun cancelAll() {
+        requests.removeAll().forEach {
+            it.cancel()
+        }
     }
 
     /**
      * Release used resources.
      */
     override fun shutdown() {
-        cancel()
+        cancelAll()
     }
 
     /**
@@ -116,12 +151,21 @@ class MapboxOnboardRouter(
         route: DirectionsRoute,
         legIndex: Int,
         callback: RouteRefreshCallback
-    ) {
-        // Does nothing
+    ): Int {
+        callback.onError(
+            RouteRefreshError(
+                "Route refresh is not available when offline."
+            )
+        )
+        return -1
     }
 
-    private fun retrieveRoute(url: String, callback: Router.Callback) {
-        mainJobControl.scope.launch {
+    override fun cancelRouteRefreshRequest(requestId: Int) {
+        // Do nothing
+    }
+
+    private fun retrieveRoute(url: String, callback: Router.Callback): Job {
+        return mainJobControl.scope.launch {
             try {
                 val routerResult = getRoute(url)
                 if (routerResult.isValue) {

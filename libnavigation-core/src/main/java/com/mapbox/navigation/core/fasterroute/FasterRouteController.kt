@@ -58,7 +58,7 @@ internal class FasterRouteController(
         fasterRouteTimer.restartAfterMillis = restartAfterMillis
 
         routeOptionsUpdater.update(
-            directionsSession.getRouteOptions(),
+            directionsSession.getPrimaryRouteOptions(),
             tripSession.getRouteProgress(),
             tripSession.getEnhancedLocation()
         )
