@@ -6,7 +6,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 
 internal class VoiceInstructionEvent {
 
-    var voiceInstructions: VoiceInstructions = VoiceInstructions.builder().build()
+    var voiceInstructions: VoiceInstructions? = null
         private set
 
     fun isOccurring(routeProgress: RouteProgress): Boolean =

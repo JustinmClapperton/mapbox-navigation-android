@@ -330,10 +330,8 @@ internal class MapboxTripSession(
         bannerInstructionsObserver: BannerInstructionsObserver
     ) {
         bannerInstructionsObservers.add(bannerInstructionsObserver)
-        routeProgress?.let {
-            checkBannerInstructionEvent(it) { bannerInstruction ->
-                bannerInstructionsObserver.onNewBannerInstructions(bannerInstruction)
-            }
+        checkBannerInstructionEvent { bannerInstruction ->
+            bannerInstructionsObserver.onNewBannerInstructions(bannerInstruction)
         }
     }
 
@@ -362,10 +360,8 @@ internal class MapboxTripSession(
         voiceInstructionsObserver: VoiceInstructionsObserver
     ) {
         voiceInstructionsObservers.add(voiceInstructionsObserver)
-        routeProgress?.let {
-            checkVoiceInstructionEvent(it) { voiceInstruction ->
-                voiceInstructionsObserver.onNewVoiceInstructions(voiceInstruction)
-            }
+        checkVoiceInstructionEvent { voiceInstruction ->
+            voiceInstructionsObserver.onNewVoiceInstructions(voiceInstruction)
         }
     }
 
@@ -539,12 +535,14 @@ internal class MapboxTripSession(
         tripService.updateNotification(progress)
         progress?.let {
             routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
-            checkBannerInstructionEvent(progress) { bannerInstruction ->
+            bannerInstructionEvent.isOccurring(progress)
+            checkBannerInstructionEvent { bannerInstruction ->
                 bannerInstructionsObservers.forEach {
                     it.onNewBannerInstructions(bannerInstruction)
                 }
             }
-            checkVoiceInstructionEvent(progress) { voiceInstruction ->
+            voiceInstructionEvent.isOccurring(progress)
+            checkVoiceInstructionEvent { voiceInstruction ->
                 voiceInstructionsObservers.forEach {
                     it.onNewVoiceInstructions(voiceInstruction)
                 }
@@ -553,34 +551,30 @@ internal class MapboxTripSession(
     }
 
     private fun checkBannerInstructionEvent(
-        progress: RouteProgress,
         action: (BannerInstructions) -> Unit
     ) {
-        if (bannerInstructionEvent.isOccurring(progress)) {
-            ifNonNull(bannerInstructionEvent.bannerInstructions) { bannerInstructions ->
-                val bannerView = bannerInstructions.view()
-                val bannerComponents = bannerView?.components()
-                ifNonNull(bannerComponents) { components ->
-                    components.forEachIndexed { index, component ->
-                        component.takeIf { it.type() == BannerComponents.GUIDANCE_VIEW }?.let { c ->
-                            components[index] =
-                                c.toBuilder()
-                                    .imageUrl(c.imageUrl()?.plus("&access_token=$accessToken"))
-                                    .build()
-                        }
+        ifNonNull(bannerInstructionEvent.bannerInstructions) { bannerInstructions ->
+            val bannerView = bannerInstructions.view()
+            val bannerComponents = bannerView?.components()
+            ifNonNull(bannerComponents) { components ->
+                components.forEachIndexed { index, component ->
+                    component.takeIf { it.type() == BannerComponents.GUIDANCE_VIEW }?.let { c ->
+                        components[index] =
+                            c.toBuilder()
+                                .imageUrl(c.imageUrl()?.plus("&access_token=$accessToken"))
+                                .build()
                     }
                 }
-                action(bannerInstructions)
             }
+            action(bannerInstructions)
         }
     }
 
     private fun checkVoiceInstructionEvent(
-        progress: RouteProgress,
         action: (VoiceInstructions) -> Unit
     ) {
-        if (voiceInstructionEvent.isOccurring(progress)) {
-            action(voiceInstructionEvent.voiceInstructions)
+        ifNonNull(voiceInstructionEvent.voiceInstructions) { voiceInstructions ->
+            action(voiceInstructions)
         }
     }
 }
