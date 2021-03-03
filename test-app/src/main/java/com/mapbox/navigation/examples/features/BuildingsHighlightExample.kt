@@ -8,6 +8,7 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.QueryFeaturesCallback
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.Style
+import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.FillExtrusionLayer
 import com.mapbox.maps.extension.style.layers.getLayer
@@ -15,10 +16,12 @@ import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
 
-class HighlightBuildingsExample(
+class BuildingsHighlightExample(
     private val mapboxMap: MapboxMap,
     private val style: Style
 ) {
+
+    var fillExtrusionColor = Color.argb(0xB2, 0xD6, 0x02, 0xEE)
 
     fun selectBuilding(point: Point) {
         val screenCoordinate = mapboxMap.pixelForCoordinate(point)
@@ -48,18 +51,17 @@ class HighlightBuildingsExample(
                 .build())
         }
 
-        if (style.styleLayerExists(layerId)) {
-            (style.getLayer(layerId) as FillExtrusionLayer)
-                .fillExtrusionHeight(10.0)
-        } else {
+        if (!style.styleLayerExists(layerId)) {
             style.addLayer(FillExtrusionLayer(layerId, sourceId)
-                .fillExtrusionColor(Color.argb(0xB2, 0xD6, 0x02, 0xEE))
-                .fillExtrusionHeight(10.0))
+                .fillExtrusionColor(fillExtrusionColor)
+                .fillExtrusionBase(Expression.get("min-height"))
+                .fillExtrusionHeight(Expression.get("height"))
+            )
         }
     }
 
     companion object {
-        private const val BUILDING_LAYER_ID = "navigation-building-layer"
-        private const val BUILDING_SOURCE_ID = "navigation-building-source"
+        private const val BUILDING_LAYER_ID = "building-highlight-layer"
+        private const val BUILDING_SOURCE_ID = "building-highlight-source"
     }
 }

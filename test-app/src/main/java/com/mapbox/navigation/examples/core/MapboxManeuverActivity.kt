@@ -47,7 +47,8 @@ import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityManeuverBinding
-import com.mapbox.navigation.examples.features.HighlightBuildingsExample
+import com.mapbox.navigation.examples.features.BuildingsCompositeExample
+import com.mapbox.navigation.examples.features.BuildingsHighlightExample
 import com.mapbox.navigation.examples.util.RouteLine
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.base.api.maneuver.ManeuverApi
@@ -68,7 +69,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     private lateinit var maneuverApi: ManeuverApi
     private lateinit var binding: LayoutActivityManeuverBinding
     private lateinit var locationComponent: LocationComponentPlugin
-    private lateinit var highlightBuildingsExample: HighlightBuildingsExample
+    private lateinit var buildingsHighlightExample: BuildingsCompositeExample
 
     private val mapboxReplayer = MapboxReplayer()
     private val replayRouteMapper = ReplayRouteMapper()
@@ -144,7 +145,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
                 enhancedLocation,
                 keyPoints,
             )
-            updateCamera(enhancedLocation)
+//            updateCamera(enhancedLocation)
         }
     }
 
@@ -272,10 +273,10 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxMap.loadStyleUri(
             MAPBOX_STREETS,
             { style: Style ->
-                highlightBuildingsExample = HighlightBuildingsExample(mapboxMap, style)
+                buildingsHighlightExample = BuildingsCompositeExample(style)
                 getGesturePlugin().addOnMapClickListener(object : OnMapClickListener {
                     override fun onMapClick(point: Point): Boolean {
-                        highlightBuildingsExample.selectBuilding(point)
+                        buildingsHighlightExample.toggleBuildings()
                         return true
                     }
                 })
